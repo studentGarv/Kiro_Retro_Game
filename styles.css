@@ -43,6 +43,33 @@ body {
     z-index: 1000;
 }
 
+.taskbar-apps {
+    display: flex;
+    gap: 4px;
+    margin-left: 80px;
+}
+
+.taskbar-app {
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 10px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.taskbar-app:active {
+    border: 2px inset #c0c0c0;
+}
+
+.taskbar-app.minimized {
+    border: 2px inset #c0c0c0;
+    background: #808080;
+}
+
 .start-button {
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
@@ -79,6 +106,11 @@ body {
     background: #c0c0c0;
     border: 2px outset #c0c0c0;
     box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, opacity 0.2s ease, width 0.3s ease, height 0.3s ease, top 0.3s ease, left 0.3s ease;
+}
+
+.window.fullscreen {
+    z-index: 999;
 }
 
 .title-bar {
