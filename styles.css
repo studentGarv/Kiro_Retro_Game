@@ -230,6 +230,10 @@ body {
     background: #000000;
     border: 2px inset #c0c0c0;
     margin: 8px;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* Controls Panel */
@@ -334,25 +338,228 @@ body {
     50% { box-shadow: 0 0 15px #ff00ff, 0 0 25px #ff00ff; }
 }
 
+/* Mobile Controls */
+.game-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mobile-mode {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.mobile-controls {
+    display: none;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(192, 192, 192, 0.9);
+    border: 2px outset #c0c0c0;
+    border-radius: 8px;
+    padding: 15px;
+    gap: 15px;
+    flex-direction: column;
+    align-items: center;
+    z-index: 100;
+}
+
+.dpad {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    width: 120px;
+    height: 120px;
+}
+
+.dpad-up {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.dpad-middle {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dpad-down {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.dpad-btn {
+    width: 35px;
+    height: 35px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.dpad-btn:active {
+    border: 2px inset #c0c0c0;
+    background: #a0a0a0;
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+.dpad-btn:hover {
+    background: #d0d0d0;
+}
+
+.dpad-center {
+    width: 35px;
+    height: 35px;
+    background: #808080;
+    border: 1px inset #c0c0c0;
+    border-radius: 50%;
+}
+
+.mobile-game-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.mobile-btn {
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+    border-radius: 4px;
+}
+
+.mobile-btn:active {
+    border: 2px inset #c0c0c0;
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+.mobile-btn:hover {
+    background: #d0d0d0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 900px) {
     .window {
         width: 95vw;
-        height: 90vh;
-        top: 20px;
+        height: 95vh;
+        top: 10px;
         left: 2.5vw;
     }
     
+    .game-container {
+        flex-direction: column;
+    }
+    
     .game-info {
-        width: 160px;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 4px;
+        border-right: none;
+        border-bottom: 2px inset #c0c0c0;
+    }
+    
+    .info-panel, .ai-panel {
+        flex: 1;
+        margin: 0 4px;
+        padding: 4px;
     }
     
     .controls-panel {
-        width: 120px;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 4px;
+        border-left: none;
+        border-top: 2px inset #c0c0c0;
+    }
+    
+    .ai-controls {
+        margin-top: 0;
+        margin-left: 8px;
     }
     
     #gameCanvas {
-        width: calc(100% - 300px);
+        width: 90vw;
+        max-width: 480px;
         height: auto;
+        margin: 4px;
+    }
+    
+    .mobile-controls {
+        display: flex;
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    /* Hide desktop taskbar on mobile */
+    .taskbar {
+        display: none;
+    }
+    
+    /* Adjust window for mobile without taskbar */
+    .window {
+        height: 100vh;
+        top: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .game-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .controls-panel {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .info-panel, .ai-panel {
+        margin: 0;
+    }
+    
+    .mobile-controls {
+        bottom: 20px;
+        padding: 10px;
+    }
+    
+    .dpad {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .dpad-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+    
+    .dpad-center {
+        width: 30px;
+        height: 30px;
     }
 }

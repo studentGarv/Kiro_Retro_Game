@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>AI Snake '95 - Retro Gaming Reimagined</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -74,7 +76,27 @@
                     </div>
                 </div>
                 
-                <canvas id="gameCanvas" width="480" height="480"></canvas>
+                <div class="game-area">
+                    <canvas id="gameCanvas" width="480" height="480"></canvas>
+                    
+                    <!-- Mobile Touch Controls -->
+                    <div class="mobile-controls" id="mobile-controls">
+                        <div class="dpad">
+                            <button class="dpad-btn dpad-up" id="btn-up">↑</button>
+                            <div class="dpad-middle">
+                                <button class="dpad-btn dpad-left" id="btn-left">←</button>
+                                <div class="dpad-center"></div>
+                                <button class="dpad-btn dpad-right" id="btn-right">→</button>
+                            </div>
+                            <button class="dpad-btn dpad-down" id="btn-down">↓</button>
+                        </div>
+                        <div class="mobile-game-controls">
+                            <button class="mobile-btn" onclick="startGame()">Start</button>
+                            <button class="mobile-btn" onclick="pauseGame()">Pause</button>
+                            <button class="mobile-btn" onclick="resetGame()">Reset</button>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="controls-panel">
                     <button class="retro-button" onclick="startGame()" id="start-btn">Start Game</button>

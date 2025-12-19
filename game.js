@@ -44,6 +44,9 @@ class SnakeGame {
             this.draw();
         });
         
+        // Touch and swipe controls
+        this.setupTouchControls();
+        
         // Initialize display
         this.draw();
         this.updateUI();
@@ -277,6 +280,9 @@ class SnakeGame {
             this.drawAIActivityIndicator();
         }
         
+        // Draw touch feedback and swipe indicators
+        this.drawTouchFeedback();
+        
         // Draw game over message
         if (this.gameOver) {
             this.drawGameOverScreen();
@@ -284,7 +290,16 @@ class SnakeGame {
             this.ctx.fillStyle = '#000000';
             this.ctx.font = '18px monospace';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Press any arrow key to start', this.canvas.width / 2, this.canvas.height / 2);
+            
+            if (isMobile()) {
+                this.ctx.fillText('Tap screen or use controls to start', this.canvas.width / 2, this.canvas.height / 2 - 20);
+                this.ctx.font = '14px monospace';
+                this.ctx.fillText('👆 Swipe anywhere to move', this.canvas.width / 2, this.canvas.height / 2);
+                this.ctx.font = '12px monospace';
+                this.ctx.fillText('Or use D-pad controls below', this.canvas.width / 2, this.canvas.height / 2 + 20);
+            } else {
+                this.ctx.fillText('Press any arrow key to start', this.canvas.width / 2, this.canvas.height / 2);
+            }
             this.ctx.textAlign = 'left';
         } else if (this.gamePaused) {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -355,6 +370,69 @@ class SnakeGame {
         this.ctx.fillText('AI', this.canvas.width - 28, 20);
     }
     
+    drawTouchFeedback() {
+        // Draw touch point feedback
+        if (this.touchPoint) {
+            const age = Date.now() - this.touchPoint.time;
+            if (age < 200) { // Show for 200ms
+                const alpha = 1 - (age / 200);
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
+                this.ctx.beginPath();
+                this.ctx.arc(this.touchPoint.x, this.touchPoint.y, 15, 0, 2 * Math.PI);
+                this.ctx.fill();
+                
+                this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+            }
+        }
+        
+        // Draw swipe direction indicator
+        if (this.swipeIndicator && this.gameRunning && !this.gameOver && !this.gamePaused) {
+            const centerX = this.canvas.width / 2;
+            const centerY = this.canvas.height / 2;
+            const size = 30;
+            
+            this.ctx.fillStyle = 'rgba(255, 255, 0, 0.7)';
+            this.ctx.font = '24px monospace';
+            this.ctx.textAlign = 'center';
+            
+            let symbol = '';
+            let offsetX = 0;
+            let offsetY = 0;
+            
+            switch (this.swipeIndicator) {
+                case 'up':
+                    symbol = '↑';
+                    offsetY = -size;
+                    break;
+                case 'down':
+                    symbol = '↓';
+                    offsetY = size;
+                    break;
+                case 'left':
+                    symbol = '←';
+                    offsetX = -size;
+                    break;
+                case 'right':
+                    symbol = '→';
+                    offsetX = size;
+                    break;
+            }
+            
+            // Draw background circle
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.beginPath();
+            this.ctx.arc(centerX + offsetX, centerY + offsetY, 20, 0, 2 * Math.PI);
+            this.ctx.fill();
+            
+            // Draw arrow
+            this.ctx.fillStyle = 'rgba(255, 255, 0, 0.9)';
+            this.ctx.fillText(symbol, centerX + offsetX, centerY + offsetY + 8);
+            this.ctx.textAlign = 'left';
+        }
+    }
+    
     drawGameOverScreen() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -386,6 +464,230 @@ class SnakeGame {
         if (this.dy === 1) return 'down';
         if (this.dy === -1) return 'up';
         return 'right'; // default
+    }
+    
+    setupTouchControls() {
+        // Touch button controls
+        const btnUp = document.getElementById('btn-up');
+        const btnDown = document.getElementById('btn-down');
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+        
+        if (btnUp) btnUp.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleDirectionInput('up');
+        });
+        
+        if (btnDown) btnDown.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleDirectionInput('down');
+        });
+        
+        if (btnLeft) btnLeft.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleDirectionInput('left');
+        });
+        
+        if (btnRight) btnRight.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleDirectionInput('right');
+        });
+        
+        // Enhanced swipe gesture recognition
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        let touchStartTime = 0;
+        let isSwipeInProgress = false;
+        
+        // Add swipe visual feedback
+        this.swipeIndicator = null;
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+            isSwipeInProgress = true;
+            
+            // Visual feedback for touch start
+            this.showTouchFeedback(touch.clientX, touch.clientY);
+        });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (isSwipeInProgress) {
+                const touch = e.changedTouches[0];
+                touchEndX = touch.clientX;
+                touchEndY = touch.clientY;
+                
+                // Show swipe direction preview
+                this.showSwipePreview(touchStartX, touchStartY, touchEndX, touchEndY);
+            }
+        });
+        
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (isSwipeInProgress) {
+                const touch = e.changedTouches[0];
+                touchEndX = touch.clientX;
+                touchEndY = touch.clientY;
+                const touchDuration = Date.now() - touchStartTime;
+                
+                this.handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY, touchDuration);
+                isSwipeInProgress = false;
+                this.clearSwipePreview();
+            }
+        });
+        
+        this.canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            isSwipeInProgress = false;
+            this.clearSwipePreview();
+        });
+        
+        // Prevent scrolling on touch
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#gameCanvas') || e.target.closest('.mobile-controls')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    }
+    
+    handleDirectionInput(direction) {
+        if (!this.gameRunning && !this.gameOver) {
+            this.startGame();
+            return;
+        }
+        
+        if (this.gameOver || this.gamePaused) {
+            return;
+        }
+        
+        const currentTime = performance.now();
+        const reactionTime = currentTime - this.lastMoveTime;
+        
+        // Prevent reverse direction and record movement
+        let validMove = false;
+        switch (direction) {
+            case 'up':
+                if (this.dy !== 1) {
+                    this.dx = 0;
+                    this.dy = -1;
+                    validMove = true;
+                }
+                break;
+            case 'down':
+                if (this.dy !== -1) {
+                    this.dx = 0;
+                    this.dy = 1;
+                    validMove = true;
+                }
+                break;
+            case 'left':
+                if (this.dx !== 1) {
+                    this.dx = -1;
+                    this.dy = 0;
+                    validMove = true;
+                }
+                break;
+            case 'right':
+                if (this.dx !== -1) {
+                    this.dx = 1;
+                    this.dy = 0;
+                    validMove = true;
+                }
+                break;
+        }
+        
+        // Record movement with AI engine
+        if (validMove && this.gameRunning) {
+            try {
+                this.aiEngine.analyzeMovement(direction, reactionTime);
+                this.lastMoveTime = currentTime;
+            } catch (error) {
+                console.warn('AI movement analysis failed:', error);
+            }
+        }
+    }
+    
+    handleSwipe(startX, startY, endX, endY, duration = 0) {
+        const minSwipeDistance = 25; // Reduced for more responsive controls
+        const maxSwipeTime = 500; // Maximum time for a valid swipe (ms)
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        // Check if swipe is long enough and fast enough
+        if (distance < minSwipeDistance || duration > maxSwipeTime) {
+            // Tap to start game if not running
+            if (!this.gameRunning && !this.gameOver) {
+                this.startGame();
+            }
+            return;
+        }
+        
+        // Determine swipe direction with improved accuracy
+        const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+        let direction = null;
+        
+        // Convert angle to direction (with 45-degree zones)
+        if (angle >= -45 && angle <= 45) {
+            direction = 'right';
+        } else if (angle >= 45 && angle <= 135) {
+            direction = 'down';
+        } else if (angle >= -135 && angle <= -45) {
+            direction = 'up';
+        } else {
+            direction = 'left';
+        }
+        
+        // Add haptic feedback if available
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+        
+        this.handleDirectionInput(direction);
+    }
+    
+    showTouchFeedback(x, y) {
+        // Convert screen coordinates to canvas coordinates
+        const rect = this.canvas.getBoundingClientRect();
+        const canvasX = (x - rect.left) * (this.canvas.width / rect.width);
+        const canvasY = (y - rect.top) * (this.canvas.height / rect.height);
+        
+        // Store touch point for visual feedback
+        this.touchPoint = { x: canvasX, y: canvasY, time: Date.now() };
+    }
+    
+    showSwipePreview(startX, startY, endX, endY) {
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        if (distance > 15) { // Show preview after minimum movement
+            let direction = null;
+            const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+            
+            if (angle >= -45 && angle <= 45) {
+                direction = 'right';
+            } else if (angle >= 45 && angle <= 135) {
+                direction = 'down';
+            } else if (angle >= -135 && angle <= -45) {
+                direction = 'up';
+            } else {
+                direction = 'left';
+            }
+            
+            this.swipeIndicator = direction;
+        }
+    }
+    
+    clearSwipePreview() {
+        this.swipeIndicator = null;
+        this.touchPoint = null;
     }
     
     gameLoop(currentTime = 0) {
@@ -701,6 +1003,12 @@ function showHelp() {
     alert('How to Play AI Snake \'95:\n\n• Use arrow keys to control the snake\n• Eat food to grow and increase score\n• Avoid hitting walls or yourself\n• Watch the AI panels to see how the AI adapts to your play style\n\nAI Features:\n• Yellow squares show predicted moves\n• Magenta food indicates AI placement\n• Difficulty bar shows current challenge level\n• AI strategy adapts to your performance');
 }
 
+// Mobile detection
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 900;
+}
+
 // Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.game = new SnakeGame();
@@ -710,13 +1018,50 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('adaptive-difficulty').addEventListener('change', toggleAdaptiveDifficulty);
     document.getElementById('smart-food').addEventListener('change', toggleSmartFood);
     
-    // Update taskbar time
-    function updateTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        document.getElementById('taskbar-time').textContent = timeString;
+    // Mobile-specific setup
+    if (isMobile()) {
+        // Show mobile controls
+        const mobileControls = document.getElementById('mobile-controls');
+        if (mobileControls) {
+            mobileControls.style.display = 'flex';
+        }
+        
+        // Adjust window for mobile
+        const gameWindow = document.getElementById('game-window');
+        gameWindow.classList.add('mobile-mode');
+        
+        // Hide desktop-specific elements
+        const taskbar = document.querySelector('.taskbar');
+        if (taskbar) {
+            taskbar.style.display = 'none';
+        }
+        
+        // Add mobile instructions
+        const titleText = document.querySelector('.title-bar-text');
+        titleText.textContent = 'AI Snake \'95 - [Mobile]';
     }
-    updateTime();
-    setInterval(updateTime, 1000);
+    
+    // Update taskbar time (desktop only)
+    if (!isMobile()) {
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const timeElement = document.getElementById('taskbar-time');
+            if (timeElement) {
+                timeElement.textContent = timeString;
+            }
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    }
+    
+    // Handle orientation changes on mobile
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (window.game) {
+                window.game.draw();
+            }
+        }, 100);
+    });
 });
    
