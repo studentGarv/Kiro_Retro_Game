@@ -1,0 +1,326 @@
+/* Win95 Retro Styling */
+@import url('https://fonts.googleapis.com/css2?family=MS+Sans+Serif:wght@400;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 11px;
+    background: #008080;
+    overflow: hidden;
+    user-select: none;
+}
+
+.desktop {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background: linear-gradient(45deg, #008080 25%, transparent 25%), 
+                linear-gradient(-45deg, #008080 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #008080 75%), 
+                linear-gradient(-45deg, transparent 75%, #008080 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Taskbar */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: #c0c0c0;
+    border-top: 2px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+    z-index: 1000;
+}
+
+.start-button {
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    padding: 2px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+}
+
+.start-button:active {
+    border: 2px inset #c0c0c0;
+}
+
+.start-icon {
+    font-size: 14px;
+}
+
+.taskbar-time {
+    background: #c0c0c0;
+    border: 1px inset #c0c0c0;
+    padding: 2px 8px;
+    font-size: 10px;
+}
+
+/* Window Styling */
+.window {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    width: 800px;
+    height: 600px;
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.title-bar {
+    height: 20px;
+    background: linear-gradient(90deg, #0000ff 0%, #000080 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.title-bar-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.title-bar-control {
+    width: 16px;
+    height: 14px;
+    background: #c0c0c0;
+    border: 1px outset #c0c0c0;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+}
+
+.title-bar-control:active {
+    border: 1px inset #c0c0c0;
+}
+
+.title-bar-control.close {
+    background: #ff0000;
+    color: white;
+}
+
+/* Menu Bar */
+.menu-bar {
+    height: 20px;
+    background: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.menu-item {
+    padding: 2px 8px;
+    cursor: pointer;
+    border: 1px transparent solid;
+}
+
+.menu-item:hover {
+    background: #0000ff;
+    color: white;
+}
+
+/* Game Container */
+.game-container {
+    display: flex;
+    height: calc(100% - 60px);
+    background: #c0c0c0;
+}
+
+.game-info {
+    width: 200px;
+    padding: 8px;
+    border-right: 2px inset #c0c0c0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.info-panel, .ai-panel {
+    background: #c0c0c0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+}
+
+.info-panel h3, .ai-panel h3 {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #000080;
+}
+
+.score-display, .level-display, .ai-status,
+.ai-prediction, .ai-difficulty, .ai-strategy {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 10px;
+}
+
+.difficulty-bar {
+    width: 80px;
+    height: 8px;
+    background: #808080;
+    border: 1px inset #c0c0c0;
+    position: relative;
+}
+
+.difficulty-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+    width: 30%;
+    transition: width 0.3s ease;
+}
+
+/* Canvas */
+#gameCanvas {
+    background: #000000;
+    border: 2px inset #c0c0c0;
+    margin: 8px;
+}
+
+/* Controls Panel */
+.controls-panel {
+    width: 150px;
+    padding: 8px;
+    border-left: 2px inset #c0c0c0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.retro-button {
+    background: #c0c0c0;
+    border: 2px outset #c0c0c0;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+}
+
+.retro-button:active {
+    border: 2px inset #c0c0c0;
+}
+
+.retro-button:disabled {
+    color: #808080;
+    cursor: not-allowed;
+}
+
+.ai-controls {
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    margin-top: 16px;
+}
+
+.ai-controls h4 {
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #000080;
+}
+
+.ai-controls label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+.ai-controls input[type="checkbox"] {
+    margin-right: 4px;
+}
+
+/* Status Bar */
+.status-bar {
+    height: 20px;
+    background: #c0c0c0;
+    border-top: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    font-size: 10px;
+}
+
+/* Game Elements */
+.snake-segment {
+    background: #00ff00;
+    border: 1px solid #ffffff;
+}
+
+.snake-head {
+    background: #00aa00;
+    border: 1px solid #ffffff;
+}
+
+.food {
+    background: #ff0000;
+    border-radius: 50%;
+    animation: pulse 1s infinite;
+}
+
+.ai-food {
+    background: #ff00ff;
+    border-radius: 50%;
+    animation: glow 2s infinite;
+}
+
+.prediction-hint {
+    background: rgba(255, 255, 0, 0.3);
+    border: 1px dashed #ffff00;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px #ff00ff; }
+    50% { box-shadow: 0 0 15px #ff00ff, 0 0 25px #ff00ff; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .window {
+        width: 95vw;
+        height: 90vh;
+        top: 20px;
+        left: 2.5vw;
+    }
+    
+    .game-info {
+        width: 160px;
+    }
+    
+    .controls-panel {
+        width: 120px;
+    }
+    
+    #gameCanvas {
+        width: calc(100% - 300px);
+        height: auto;
+    }
+}

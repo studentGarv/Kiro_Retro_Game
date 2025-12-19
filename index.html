@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Snake '95 - Retro Gaming Reimagined</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="desktop">
+        <div class="taskbar">
+            <div class="start-button">
+                <span class="start-icon">🪟</span>
+                Start
+            </div>
+            <div class="taskbar-time" id="taskbar-time"></div>
+        </div>
+        
+        <div class="window" id="game-window">
+            <div class="title-bar">
+                <div class="title-bar-text">AI Snake '95 - [Playing]</div>
+                <div class="title-bar-controls">
+                    <button class="title-bar-control" onclick="minimizeWindow()">_</button>
+                    <button class="title-bar-control" onclick="toggleFullscreen()">□</button>
+                    <button class="title-bar-control close" onclick="closeGame()">×</button>
+                </div>
+            </div>
+            
+            <div class="menu-bar">
+                <span class="menu-item" onclick="showAbout()">Game</span>
+                <span class="menu-item" onclick="showSettings()">AI Settings</span>
+                <span class="menu-item" onclick="showStats()">Statistics</span>
+                <span class="menu-item" onclick="showHelp()">Help</span>
+            </div>
+            
+            <div class="game-container">
+                <div class="game-info">
+                    <div class="info-panel">
+                        <div class="score-display">
+                            <label>Score:</label>
+                            <span id="score">0</span>
+                        </div>
+                        <div class="level-display">
+                            <label>Level:</label>
+                            <span id="level">1</span>
+                        </div>
+                        <div class="ai-status">
+                            <label>AI Mode:</label>
+                            <span id="ai-mode">Adaptive</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-panel">
+                        <h3>AI Insights</h3>
+                        <div class="ai-prediction">
+                            <label>Next Move Prediction:</label>
+                            <span id="prediction">→</span>
+                        </div>
+                        <div class="ai-difficulty">
+                            <label>Difficulty Adjustment:</label>
+                            <div class="difficulty-bar">
+                                <div class="difficulty-fill" id="difficulty-fill"></div>
+                            </div>
+                        </div>
+                        <div class="ai-strategy">
+                            <label>AI Strategy:</label>
+                            <span id="strategy">Learning...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <canvas id="gameCanvas" width="480" height="480"></canvas>
+                
+                <div class="controls-panel">
+                    <button class="retro-button" onclick="startGame()" id="start-btn">Start Game</button>
+                    <button class="retro-button" onclick="pauseGame()" id="pause-btn">Pause</button>
+                    <button class="retro-button" onclick="resetGame()">Reset</button>
+                    
+                    <div class="ai-controls">
+                        <h4>AI Settings</h4>
+                        <label>
+                            <input type="checkbox" id="ai-hints" checked> Show AI Predictions
+                        </label>
+                        <label>
+                            <input type="checkbox" id="adaptive-difficulty" checked> Adaptive Difficulty
+                        </label>
+                        <label>
+                            <input type="checkbox" id="smart-food" checked> Smart Food Placement
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <span>Ready to play AI Snake '95</span>
+                <span id="fps-counter">FPS: 60</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="ai-engine.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
