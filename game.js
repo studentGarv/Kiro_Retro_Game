@@ -26,6 +26,9 @@ class SnakeGame {
         this.lastUpdateTime = 0;
         this.moveInterval = 150; // Base move interval in ms
         
+        // Adjust canvas size for mobile
+        this.adjustCanvasSize();
+        
         // Bind methods
         this.gameLoop = this.gameLoop.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -292,11 +295,12 @@ class SnakeGame {
             this.ctx.textAlign = 'center';
             
             if (isMobile()) {
-                this.ctx.fillText('Tap screen or use controls to start', this.canvas.width / 2, this.canvas.height / 2 - 20);
+                this.ctx.font = '24px monospace';
+                this.ctx.fillText('AI Snake \'95', this.canvas.width / 2, this.canvas.height / 2 - 40);
+                this.ctx.font = '16px monospace';
+                this.ctx.fillText('Swipe anywhere to move', this.canvas.width / 2, this.canvas.height / 2 - 10);
                 this.ctx.font = '14px monospace';
-                this.ctx.fillText('👆 Swipe anywhere to move', this.canvas.width / 2, this.canvas.height / 2);
-                this.ctx.font = '12px monospace';
-                this.ctx.fillText('Or use D-pad controls below', this.canvas.width / 2, this.canvas.height / 2 + 20);
+                this.ctx.fillText('Tap to start playing', this.canvas.width / 2, this.canvas.height / 2 + 20);
             } else {
                 this.ctx.fillText('Press any arrow key to start', this.canvas.width / 2, this.canvas.height / 2);
             }
@@ -371,66 +375,8 @@ class SnakeGame {
     }
     
     drawTouchFeedback() {
-        // Draw touch point feedback
-        if (this.touchPoint) {
-            const age = Date.now() - this.touchPoint.time;
-            if (age < 200) { // Show for 200ms
-                const alpha = 1 - (age / 200);
-                this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
-                this.ctx.beginPath();
-                this.ctx.arc(this.touchPoint.x, this.touchPoint.y, 15, 0, 2 * Math.PI);
-                this.ctx.fill();
-                
-                this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-                this.ctx.lineWidth = 2;
-                this.ctx.stroke();
-            }
-        }
-        
-        // Draw swipe direction indicator
-        if (this.swipeIndicator && this.gameRunning && !this.gameOver && !this.gamePaused) {
-            const centerX = this.canvas.width / 2;
-            const centerY = this.canvas.height / 2;
-            const size = 30;
-            
-            this.ctx.fillStyle = 'rgba(255, 255, 0, 0.7)';
-            this.ctx.font = '24px monospace';
-            this.ctx.textAlign = 'center';
-            
-            let symbol = '';
-            let offsetX = 0;
-            let offsetY = 0;
-            
-            switch (this.swipeIndicator) {
-                case 'up':
-                    symbol = '↑';
-                    offsetY = -size;
-                    break;
-                case 'down':
-                    symbol = '↓';
-                    offsetY = size;
-                    break;
-                case 'left':
-                    symbol = '←';
-                    offsetX = -size;
-                    break;
-                case 'right':
-                    symbol = '→';
-                    offsetX = size;
-                    break;
-            }
-            
-            // Draw background circle
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            this.ctx.beginPath();
-            this.ctx.arc(centerX + offsetX, centerY + offsetY, 20, 0, 2 * Math.PI);
-            this.ctx.fill();
-            
-            // Draw arrow
-            this.ctx.fillStyle = 'rgba(255, 255, 0, 0.9)';
-            this.ctx.fillText(symbol, centerX + offsetX, centerY + offsetY + 8);
-            this.ctx.textAlign = 'left';
-        }
+        // Touch feedback disabled for cleaner mobile experience
+        // Swipe direction indicators removed
     }
     
     drawGameOverScreen() {
@@ -467,33 +413,7 @@ class SnakeGame {
     }
     
     setupTouchControls() {
-        // Touch button controls
-        const btnUp = document.getElementById('btn-up');
-        const btnDown = document.getElementById('btn-down');
-        const btnLeft = document.getElementById('btn-left');
-        const btnRight = document.getElementById('btn-right');
-        
-        if (btnUp) btnUp.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.handleDirectionInput('up');
-        });
-        
-        if (btnDown) btnDown.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.handleDirectionInput('down');
-        });
-        
-        if (btnLeft) btnLeft.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.handleDirectionInput('left');
-        });
-        
-        if (btnRight) btnRight.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.handleDirectionInput('right');
-        });
-        
-        // Enhanced swipe gesture recognition
+        // Enhanced swipe gesture recognition for fullscreen mobile
         let touchStartX = 0;
         let touchStartY = 0;
         let touchEndX = 0;
@@ -511,9 +431,6 @@ class SnakeGame {
             touchStartY = touch.clientY;
             touchStartTime = Date.now();
             isSwipeInProgress = true;
-            
-            // Visual feedback for touch start
-            this.showTouchFeedback(touch.clientX, touch.clientY);
         });
         
         this.canvas.addEventListener('touchmove', (e) => {
@@ -522,9 +439,6 @@ class SnakeGame {
                 const touch = e.changedTouches[0];
                 touchEndX = touch.clientX;
                 touchEndY = touch.clientY;
-                
-                // Show swipe direction preview
-                this.showSwipePreview(touchStartX, touchStartY, touchEndX, touchEndY);
             }
         });
         
@@ -548,12 +462,22 @@ class SnakeGame {
             this.clearSwipePreview();
         });
         
-        // Prevent scrolling on touch
+        // Prevent scrolling and zooming on mobile
         document.addEventListener('touchmove', (e) => {
-            if (e.target.closest('#gameCanvas') || e.target.closest('.mobile-controls')) {
-                e.preventDefault();
-            }
+            e.preventDefault();
         }, { passive: false });
+        
+        document.addEventListener('gesturestart', (e) => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('gesturechange', (e) => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('gestureend', (e) => {
+            e.preventDefault();
+        });
     }
     
     handleDirectionInput(direction) {
@@ -653,41 +577,54 @@ class SnakeGame {
     }
     
     showTouchFeedback(x, y) {
-        // Convert screen coordinates to canvas coordinates
-        const rect = this.canvas.getBoundingClientRect();
-        const canvasX = (x - rect.left) * (this.canvas.width / rect.width);
-        const canvasY = (y - rect.top) * (this.canvas.height / rect.height);
-        
-        // Store touch point for visual feedback
-        this.touchPoint = { x: canvasX, y: canvasY, time: Date.now() };
+        // Touch feedback disabled for cleaner mobile experience
     }
     
     showSwipePreview(startX, startY, endX, endY) {
-        const deltaX = endX - startX;
-        const deltaY = endY - startY;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        
-        if (distance > 15) { // Show preview after minimum movement
-            let direction = null;
-            const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-            
-            if (angle >= -45 && angle <= 45) {
-                direction = 'right';
-            } else if (angle >= 45 && angle <= 135) {
-                direction = 'down';
-            } else if (angle >= -135 && angle <= -45) {
-                direction = 'up';
-            } else {
-                direction = 'left';
-            }
-            
-            this.swipeIndicator = direction;
-        }
+        // Swipe preview disabled for cleaner mobile experience
     }
     
     clearSwipePreview() {
-        this.swipeIndicator = null;
-        this.touchPoint = null;
+        // No visual feedback to clear
+    }
+    
+    adjustCanvasSize() {
+        if (isMobile()) {
+            // Make canvas fill the screen on mobile
+            const updateCanvasSize = () => {
+                const canvas = this.canvas;
+                const container = canvas.parentElement;
+                
+                // Get the actual viewport size
+                const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                
+                // Set canvas to fill viewport
+                canvas.style.width = vw + 'px';
+                canvas.style.height = vh + 'px';
+                
+                // Maintain square aspect ratio for game logic
+                const size = Math.min(vw, vh);
+                canvas.width = size;
+                canvas.height = size;
+                
+                // Update grid size to maintain game proportions
+                this.gridSize = Math.floor(size / 20); // 20x20 grid
+                this.tileCount = Math.floor(size / this.gridSize);
+                
+                // Redraw if game is initialized
+                if (this.snake) {
+                    this.draw();
+                }
+            };
+            
+            // Update on load and resize
+            updateCanvasSize();
+            window.addEventListener('resize', updateCanvasSize);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(updateCanvasSize, 100);
+            });
+        }
     }
     
     gameLoop(currentTime = 0) {
@@ -1020,13 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Mobile-specific setup
     if (isMobile()) {
-        // Show mobile controls
-        const mobileControls = document.getElementById('mobile-controls');
-        if (mobileControls) {
-            mobileControls.style.display = 'flex';
-        }
-        
-        // Adjust window for mobile
+        // Adjust window for mobile fullscreen
         const gameWindow = document.getElementById('game-window');
         gameWindow.classList.add('mobile-mode');
         
@@ -1036,9 +967,15 @@ document.addEventListener('DOMContentLoaded', () => {
             taskbar.style.display = 'none';
         }
         
-        // Add mobile instructions
+        // Set mobile title
         const titleText = document.querySelector('.title-bar-text');
-        titleText.textContent = 'AI Snake \'95 - [Mobile]';
+        if (titleText) {
+            titleText.textContent = 'AI Snake \'95 - [Mobile]';
+        }
+        
+        // Prevent zoom and scroll
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
     }
     
     // Update taskbar time (desktop only)
