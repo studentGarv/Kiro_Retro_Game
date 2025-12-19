@@ -1,0 +1,40 @@
+{
+  "name": "ai-snake-95",
+  "version": "1.0.0",
+  "description": "A retro-styled Snake game enhanced with artificial intelligence, featuring adaptive difficulty and player behavior analysis",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "python3 -m http.server 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/ai-snake-95.git"
+  },
+  "keywords": [
+    "snake-game",
+    "artificial-intelligence",
+    "retro-gaming",
+    "windows-95",
+    "javascript",
+    "html5-canvas",
+    "mobile-game",
+    "adaptive-difficulty",
+    "pattern-recognition",
+    "browser-game"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/your-username/ai-snake-95/issues"
+  },
+  "homepage": "https://your-username.github.io/ai-snake-95",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
