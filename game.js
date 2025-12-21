@@ -244,20 +244,20 @@ class SnakeGame {
         }
         
         // Draw snake
-        this.ctx.fillStyle = '#008000';
         this.snake.forEach((segment, index) => {
-            // Snake head is slightly different color
             if (index === 0) {
-                this.ctx.fillStyle = '#00aa00';
+                // Draw triangular head pointing in movement direction
+                this.drawSnakeHead(segment);
             } else {
+                // Draw regular body segments
                 this.ctx.fillStyle = '#008000';
+                this.ctx.fillRect(
+                    segment.x * this.gridSize + 1,
+                    segment.y * this.gridSize + 1,
+                    this.gridSize - 2,
+                    this.gridSize - 2
+                );
             }
-            this.ctx.fillRect(
-                segment.x * this.gridSize + 1,
-                segment.y * this.gridSize + 1,
-                this.gridSize - 2,
-                this.gridSize - 2
-            );
         });
         
         // Draw food with AI indicator
@@ -379,6 +379,63 @@ class SnakeGame {
         // Swipe direction indicators removed
     }
     
+    drawSnakeHead(headSegment) {
+        const x = headSegment.x * this.gridSize;
+        const y = headSegment.y * this.gridSize;
+        const size = this.gridSize;
+        const padding = 1;
+        
+        // Set head color
+        this.ctx.fillStyle = '#00aa00';
+        
+        // Get current direction
+        const direction = this.getCurrentDirection();
+        
+        // Draw triangular head based on direction
+        this.ctx.beginPath();
+        
+        switch (direction) {
+            case 'right':
+                // Triangle pointing right
+                this.ctx.moveTo(x + padding, y + padding);
+                this.ctx.lineTo(x + size - padding, y + size / 2);
+                this.ctx.lineTo(x + padding, y + size - padding);
+                break;
+            case 'left':
+                // Triangle pointing left
+                this.ctx.moveTo(x + size - padding, y + padding);
+                this.ctx.lineTo(x + padding, y + size / 2);
+                this.ctx.lineTo(x + size - padding, y + size - padding);
+                break;
+            case 'up':
+                // Triangle pointing up
+                this.ctx.moveTo(x + padding, y + size - padding);
+                this.ctx.lineTo(x + size / 2, y + padding);
+                this.ctx.lineTo(x + size - padding, y + size - padding);
+                break;
+            case 'down':
+                // Triangle pointing down
+                this.ctx.moveTo(x + padding, y + padding);
+                this.ctx.lineTo(x + size / 2, y + size - padding);
+                this.ctx.lineTo(x + size - padding, y + padding);
+                break;
+            default:
+                // Default to right-pointing triangle
+                this.ctx.moveTo(x + padding, y + padding);
+                this.ctx.lineTo(x + size - padding, y + size / 2);
+                this.ctx.lineTo(x + padding, y + size - padding);
+                break;
+        }
+        
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        // Add a subtle border for better visibility
+        this.ctx.strokeStyle = '#006600';
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+    }
+    
     drawGameOverScreen() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -399,8 +456,13 @@ class SnakeGame {
         this.ctx.fillText(`Success Rate: ${aiStatus.successRate}%`, this.canvas.width / 2, this.canvas.height / 2 + 15);
         this.ctx.fillText(`Total Moves: ${aiStatus.totalMoves}`, this.canvas.width / 2, this.canvas.height / 2 + 30);
         
+        // Different restart message for mobile vs desktop
         this.ctx.font = '14px monospace';
-        this.ctx.fillText('Press SPACE to restart', this.canvas.width / 2, this.canvas.height / 2 + 60);
+        if (isMobile()) {
+            this.ctx.fillText('Touch anywhere to restart', this.canvas.width / 2, this.canvas.height / 2 + 60);
+        } else {
+            this.ctx.fillText('Press SPACE to restart', this.canvas.width / 2, this.canvas.height / 2 + 60);
+        }
         this.ctx.textAlign = 'left';
     }
     
@@ -550,6 +612,16 @@ class SnakeGame {
             if (!this.gameRunning && !this.gameOver) {
                 this.startGame();
             }
+            // Tap to restart game if game is over
+            else if (this.gameOver) {
+                this.resetGame();
+            }
+            return;
+        }
+        
+        // If game is over, any swipe should restart
+        if (this.gameOver) {
+            this.resetGame();
             return;
         }
         
@@ -624,6 +696,12 @@ class SnakeGame {
             window.addEventListener('orientationchange', () => {
                 setTimeout(updateCanvasSize, 100);
             });
+        } else {
+            // Desktop: Keep original canvas size and grid
+            this.canvas.width = 480;
+            this.canvas.height = 480;
+            this.gridSize = 24;
+            this.tileCount = 20;
         }
     }
     
