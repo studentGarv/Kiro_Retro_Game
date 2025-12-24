@@ -72,14 +72,28 @@ class SnakeGame {
             }
         }
         
-        // Fallback to random placement
+        // Fallback to random placement with buffer zone
+        const buffer = 1; // 1-tile buffer from edges
         let food;
+        let attempts = 0;
+        const maxAttempts = 100;
+        
         do {
-            food = {
-                x: Math.floor(Math.random() * this.tileCount),
-                y: Math.floor(Math.random() * this.tileCount)
-            };
-        } while (this.snake.some(segment => segment.x === food.x && segment.y === food.y));
+            // Try with buffer zone first
+            if (attempts < maxAttempts / 2) {
+                food = {
+                    x: buffer + Math.floor(Math.random() * (this.tileCount - 2 * buffer)),
+                    y: buffer + Math.floor(Math.random() * (this.tileCount - 2 * buffer))
+                };
+            } else {
+                // Fallback to full grid if buffer zone fails
+                food = {
+                    x: Math.floor(Math.random() * this.tileCount),
+                    y: Math.floor(Math.random() * this.tileCount)
+                };
+            }
+            attempts++;
+        } while (this.snake.some(segment => segment.x === food.x && segment.y === food.y) && attempts < maxAttempts);
         
         return food;
     }

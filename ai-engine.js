@@ -110,12 +110,24 @@ class AIEngine {
         
         const head = snake[0];
         const possiblePositions = [];
+        const buffer = 1; // 1-tile buffer from edges
         
-        // Get all empty positions
-        for (let x = 0; x < gridSize; x++) {
-            for (let y = 0; y < gridSize; y++) {
+        // Get all empty positions with buffer zone
+        for (let x = buffer; x < gridSize - buffer; x++) {
+            for (let y = buffer; y < gridSize - buffer; y++) {
                 if (!this.isPositionOccupied(x, y, snake)) {
                     possiblePositions.push({ x, y });
+                }
+            }
+        }
+        
+        if (possiblePositions.length === 0) {
+            // Fallback to full grid if no positions available in buffer zone
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    if (!this.isPositionOccupied(x, y, snake)) {
+                        possiblePositions.push({ x, y });
+                    }
                 }
             }
         }
@@ -245,11 +257,24 @@ class AIEngine {
     // Random food position fallback
     getRandomFoodPosition(snake, gameBoard, gridSize) {
         const possiblePositions = [];
+        const buffer = 1; // 1-tile buffer from edges
         
-        for (let x = 0; x < gridSize; x++) {
-            for (let y = 0; y < gridSize; y++) {
+        // Try with buffer zone first
+        for (let x = buffer; x < gridSize - buffer; x++) {
+            for (let y = buffer; y < gridSize - buffer; y++) {
                 if (!this.isPositionOccupied(x, y, snake)) {
                     possiblePositions.push({ x, y });
+                }
+            }
+        }
+        
+        // Fallback to full grid if no positions available in buffer zone
+        if (possiblePositions.length === 0) {
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    if (!this.isPositionOccupied(x, y, snake)) {
+                        possiblePositions.push({ x, y });
+                    }
                 }
             }
         }
