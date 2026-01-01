@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
@@ -11,6 +12,7 @@
     <title>AI Snake '95 - Retro Gaming Reimagined</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="desktop">
         <div class="taskbar">
@@ -25,7 +27,7 @@
             </div>
             <div class="taskbar-time" id="taskbar-time"></div>
         </div>
-        
+
         <div class="window" id="game-window">
             <div class="title-bar">
                 <div class="title-bar-text">AI Snake '95 - [Playing]</div>
@@ -35,14 +37,14 @@
                     <button class="title-bar-control close" onclick="closeGame()">×</button>
                 </div>
             </div>
-            
+
             <div class="menu-bar">
                 <span class="menu-item" onclick="showAbout()">Game</span>
                 <span class="menu-item" onclick="showSettings()">AI Settings</span>
                 <span class="menu-item" onclick="showStats()">Statistics</span>
                 <span class="menu-item" onclick="showHelp()">Help</span>
             </div>
-            
+
             <div class="game-container">
                 <div class="game-info">
                     <div class="info-panel">
@@ -50,8 +52,12 @@
                             <label>Score:</label>
                             <span id="score">0</span>
                         </div>
+                        <div class="score-display">
+                            <label>High Score:</label>
+                            <span id="high-score">0</span>
+                        </div>
                         <div class="level-display">
-                            <label>Level:</label>
+                            <label>Speed:</label>
                             <span id="level">1</span>
                         </div>
                         <div class="ai-status">
@@ -59,7 +65,7 @@
                             <span id="ai-mode">Adaptive</span>
                         </div>
                     </div>
-                    
+
                     <div class="ai-panel">
                         <h3>AI Insights</h3>
                         <div class="ai-prediction">
@@ -78,16 +84,16 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="game-area">
                     <canvas id="gameCanvas" width="480" height="480"></canvas>
                 </div>
-                
+
                 <div class="controls-panel">
                     <button class="retro-button" onclick="startGame()" id="start-btn">Start Game</button>
                     <button class="retro-button" onclick="pauseGame()" id="pause-btn">Pause</button>
                     <button class="retro-button" onclick="resetGame()">Reset</button>
-                    
+
                     <div class="ai-controls">
                         <h4>AI Settings</h4>
                         <label>
@@ -102,15 +108,16 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="status-bar">
                 <span>Ready to play AI Snake '95</span>
                 <span id="fps-counter">FPS: 60</span>
             </div>
         </div>
     </div>
-    
+
     <script src="ai-engine.js"></script>
     <script src="game.js"></script>
 </body>
+
 </html>

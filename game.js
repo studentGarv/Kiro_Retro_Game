@@ -16,6 +16,7 @@ class SnakeGame {
         this.dx = 0;
         this.dy = 0;
         this.score = 0;
+        this.highScore = this.loadHighScore(); // Load high score from localStorage
         this.gameRunning = false;
         this.gameOver = false;
         this.gamePaused = false;
@@ -24,6 +25,7 @@ class SnakeGame {
         this.aiEngine = new AIEngine();
         this.lastMoveTime = 0;
         this.lastUpdateTime = 0;
+        this.lastDrawTime = 0; // Track last draw time for stable 60 FPS
         this.moveInterval = 150; // Base move interval in ms
 
         // Adjust canvas size for mobile
@@ -98,6 +100,33 @@ class SnakeGame {
         return food;
     }
 
+    loadHighScore() {
+        try {
+            const saved = localStorage.getItem('snakeHighScore');
+            return saved ? parseInt(saved, 10) : 0;
+        } catch (error) {
+            console.warn('Failed to load high score:', error);
+            return 0;
+        }
+    }
+
+    saveHighScore() {
+        try {
+            localStorage.setItem('snakeHighScore', this.highScore.toString());
+        } catch (error) {
+            console.warn('Failed to save high score:', error);
+        }
+    }
+
+    updateHighScore() {
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            this.saveHighScore();
+            return true; // New high score!
+        }
+        return false;
+    }
+
     handleKeyPress(event) {
         if (!this.gameRunning && !this.gameOver) {
             this.startGame();
@@ -170,6 +199,7 @@ class SnakeGame {
         this.dy = 0;
         this.lastMoveTime = performance.now();
         this.lastUpdateTime = 0;
+        this.lastDrawTime = 0; // Reset draw timing for smooth start
         this.aiEngine.reset();
         this.updateUI();
         requestAnimationFrame((time) => this.gameLoop(time));
@@ -180,6 +210,7 @@ class SnakeGame {
             this.gamePaused = !this.gamePaused;
             if (!this.gamePaused) {
                 this.lastUpdateTime = 0; // Reset timing
+                this.lastDrawTime = 0; // Reset draw timing
                 requestAnimationFrame((time) => this.gameLoop(time));
             }
         }
@@ -209,6 +240,7 @@ class SnakeGame {
         // Check wall collision
         if (head.x < 0 || head.x >= this.tileCount || head.y < 0 || head.y >= this.tileCount) {
             this.gameOver = true;
+            this.updateHighScore(); // Check and save high score
             this.aiEngine.recordCollision();
             this.updateUI();
             return;
@@ -217,6 +249,7 @@ class SnakeGame {
         // Check self collision
         if (this.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
             this.gameOver = true;
+            this.updateHighScore(); // Check and save high score
             this.aiEngine.recordCollision();
             this.updateUI();
             return;
@@ -289,8 +322,8 @@ class SnakeGame {
             );
 
 
-            // Draw score
-            this.ctx.fillStyle = '#ffffff';
+            // Draw score with appropriate color for background
+            this.ctx.fillStyle = isMobile() ? '#ffffff' : '#000000';
             this.ctx.font = '16px monospace';
             this.ctx.fillText(`Score: ${this.score}`, 10, 25);
 
@@ -306,7 +339,7 @@ class SnakeGame {
             if (this.gameOver) {
                 this.drawGameOverScreen();
             } else if (!this.gameRunning) {
-                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillStyle = isMobile() ? '#ffffff' : '#000000';
                 this.ctx.font = '18px monospace';
                 this.ctx.textAlign = 'center';
 
@@ -385,7 +418,7 @@ class SnakeGame {
         this.ctx.fillStyle = `rgba(0, 255, 255, ${0.3 + intensity * 0.7})`;
         this.ctx.fillRect(this.canvas.width - 30, 10, 20, 8);
 
-        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillStyle = isMobile() ? '#ffffff' : '#000000';
         this.ctx.font = '10px monospace';
         this.ctx.fillText('AI', this.canvas.width - 28, 20);
     }
@@ -457,27 +490,42 @@ class SnakeGame {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         const aiStatus = this.aiEngine.getAIStatus();
+        const isNewHighScore = this.score === this.highScore && this.score > 0;
 
         this.ctx.fillStyle = '#ffffff';
         this.ctx.font = '24px monospace';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('Game Over!', this.canvas.width / 2, this.canvas.height / 2 - 60);
+        this.ctx.fillText('Game Over!', this.canvas.width / 2, this.canvas.height / 2 - 80);
 
+        // Show new high score celebration
+        if (isNewHighScore) {
+            this.ctx.fillStyle = '#ffff00';
+            this.ctx.font = '18px monospace';
+            this.ctx.fillText('🏆 NEW HIGH SCORE! 🏆', this.canvas.width / 2, this.canvas.height / 2 - 55);
+        }
+
+        this.ctx.fillStyle = '#ffffff';
         this.ctx.font = '16px monospace';
         this.ctx.fillText(`Final Score: ${this.score}`, this.canvas.width / 2, this.canvas.height / 2 - 30);
 
+        // Show high score
+        this.ctx.font = '14px monospace';
+        this.ctx.fillStyle = '#ffff00';
+        this.ctx.fillText(`High Score: ${this.highScore}`, this.canvas.width / 2, this.canvas.height / 2 - 10);
+
         // AI Performance Summary
+        this.ctx.fillStyle = '#ffffff';
         this.ctx.font = '12px monospace';
-        this.ctx.fillText(`AI Skill Assessment: Level ${aiStatus.skillLevel}/5`, this.canvas.width / 2, this.canvas.height / 2);
-        this.ctx.fillText(`Success Rate: ${aiStatus.successRate}%`, this.canvas.width / 2, this.canvas.height / 2 + 15);
-        this.ctx.fillText(`Total Moves: ${aiStatus.totalMoves}`, this.canvas.width / 2, this.canvas.height / 2 + 30);
+        this.ctx.fillText(`AI Skill Assessment: Level ${aiStatus.skillLevel}/5`, this.canvas.width / 2, this.canvas.height / 2 + 10);
+        this.ctx.fillText(`Success Rate: ${aiStatus.successRate}%`, this.canvas.width / 2, this.canvas.height / 2 + 25);
+        this.ctx.fillText(`Total Moves: ${aiStatus.totalMoves}`, this.canvas.width / 2, this.canvas.height / 2 + 40);
 
         // Different restart message for mobile vs desktop
         this.ctx.font = '14px monospace';
         if (isMobile()) {
-            this.ctx.fillText('Touch anywhere to restart', this.canvas.width / 2, this.canvas.height / 2 + 60);
+            this.ctx.fillText('Touch anywhere to restart', this.canvas.width / 2, this.canvas.height / 2 + 65);
         } else {
-            this.ctx.fillText('Press SPACE to restart', this.canvas.width / 2, this.canvas.height / 2 + 60);
+            this.ctx.fillText('Press SPACE to restart', this.canvas.width / 2, this.canvas.height / 2 + 65);
         }
         this.ctx.textAlign = 'left';
     }
@@ -677,21 +725,19 @@ class SnakeGame {
     }
 
     adjustCanvasSize() {
-        if (isMobile()) {
-            // Make canvas fill the screen on mobile
-            const updateCanvasSize = () => {
-                const canvas = this.canvas;
-                const container = canvas.parentElement;
+        const updateCanvasSize = () => {
+            const canvas = this.canvas;
 
-                // Get the actual viewport size
+            if (isMobile()) {
+                // Mobile: Fill the screen
                 const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
                 const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
 
-                // Set canvas to fill viewport
+                // Set canvas display size to fill viewport
                 canvas.style.width = vw + 'px';
                 canvas.style.height = vh + 'px';
 
-                // Maintain square aspect ratio for game logic
+                // Set canvas internal resolution (square aspect ratio)
                 const size = Math.min(vw, vh);
                 canvas.width = size;
                 canvas.height = size;
@@ -699,26 +745,63 @@ class SnakeGame {
                 // Update grid size to maintain game proportions
                 this.gridSize = Math.floor(size / 20); // 20x20 grid
                 this.tileCount = Math.floor(size / this.gridSize);
+            } else {
+                // Desktop: Dynamic size based on available space
+                const gameArea = document.querySelector('.game-area');
+                if (gameArea) {
+                    const areaWidth = gameArea.clientWidth;
+                    const areaHeight = gameArea.clientHeight;
 
-                // Redraw if game is initialized
-                if (this.snake) {
-                    this.draw();
+                    // Use the smaller dimension to maintain square aspect ratio
+                    const size = Math.min(areaWidth, areaHeight) - 32; // 32px padding
+
+                    // Set canvas internal resolution
+                    canvas.width = size;
+                    canvas.height = size;
+
+                    // Set canvas display size
+                    canvas.style.width = size + 'px';
+                    canvas.style.height = size + 'px';
+
+                    // Update grid size to maintain game proportions
+                    this.gridSize = Math.floor(size / 20); // 20x20 grid
+                    this.tileCount = 20;
+                } else {
+                    // Fallback to fixed size if game area not found
+                    canvas.width = 480;
+                    canvas.height = 480;
+                    canvas.style.width = '480px';
+                    canvas.style.height = '480px';
+                    this.gridSize = 24;
+                    this.tileCount = 20;
                 }
-            };
+            }
 
-            // Update on load and resize
-            updateCanvasSize();
-            window.addEventListener('resize', updateCanvasSize);
-            window.addEventListener('orientationchange', () => {
-                setTimeout(updateCanvasSize, 100);
-            });
-        } else {
-            // Desktop: Keep original canvas size and grid
-            this.canvas.width = 480;
-            this.canvas.height = 480;
-            this.gridSize = 24;
-            this.tileCount = 20;
-        }
+            // Redraw if game is initialized
+            if (this.snake) {
+                this.draw();
+            }
+        };
+
+        // Initial size update
+        updateCanvasSize();
+
+        // Add resize listeners for both mobile and desktop
+        let resizeTimeout;
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                updateCanvasSize();
+            }, 100);
+        };
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateCanvasSize, 200);
+        });
+
+        // Store the update function for potential manual calls
+        this.updateCanvasSize = updateCanvasSize;
     }
 
     gameLoop(currentTime = 0) {
@@ -726,22 +809,40 @@ class SnakeGame {
             return;
         }
 
-        // Calculate time since last update
-        const deltaTime = currentTime - this.lastUpdateTime;
-
-        // Use AI-adjusted speed
-        const baseSpeed = 150;
-        const difficulty = this.aiEngine.gameState.currentDifficulty;
-        const adjustedSpeed = Math.max(50, baseSpeed - (difficulty * 100));
-
-        // Only update game state if enough time has passed
-        if (deltaTime >= adjustedSpeed) {
-            this.update();
+        // Initialize lastUpdateTime on first frame
+        if (this.lastUpdateTime === 0) {
             this.lastUpdateTime = currentTime;
         }
 
-        // Always draw to maintain smooth visuals
-        this.draw();
+        // Calculate time since last update
+        const deltaTime = currentTime - this.lastUpdateTime;
+
+        // Progressive speed system based on score
+        // Start slow (250ms) and gradually speed up as score increases
+        const startSpeed = 250;  // Slow start (250ms between moves)
+        const maxSpeed = 80;     // Maximum speed (80ms between moves)
+        const speedIncreaseRate = 0.8; // Speed increases by 0.8ms per point
+
+        // Calculate current speed based on score
+        // Speed decreases (gets faster) as score increases
+        const currentSpeed = Math.max(maxSpeed, startSpeed - (this.score * speedIncreaseRate));
+
+        // Track if we need to redraw
+        let needsRedraw = false;
+
+        // Only update game state if enough time has passed
+        if (deltaTime >= currentSpeed) {
+            this.update();
+            this.lastUpdateTime = currentTime;
+            needsRedraw = true;
+        }
+
+        // Only draw when game state changes to maintain stable 60 FPS
+        // This prevents unnecessary redraws and ensures smooth performance
+        if (needsRedraw || !this.lastDrawTime || (currentTime - this.lastDrawTime) >= 16.67) {
+            this.draw();
+            this.lastDrawTime = currentTime;
+        }
 
         // Continue game loop
         if (this.gameRunning && !this.gameOver && !this.gamePaused) {
@@ -752,6 +853,19 @@ class SnakeGame {
     updateUI() {
         // Update score
         document.getElementById('score').textContent = this.score;
+
+        // Update high score
+        document.getElementById('high-score').textContent = this.highScore;
+
+        // Calculate and update speed level (1-10)
+        const startSpeed = 250;
+        const maxSpeed = 80;
+        const speedIncreaseRate = 0.8;
+        const currentSpeed = Math.max(maxSpeed, startSpeed - (this.score * speedIncreaseRate));
+
+        // Convert speed to level (1-10, where 10 is fastest)
+        const speedLevel = Math.min(10, Math.max(1, Math.floor(((startSpeed - currentSpeed) / (startSpeed - maxSpeed)) * 9) + 1));
+        document.getElementById('level').textContent = speedLevel;
 
         // Update AI status
         const aiStatus = this.aiEngine.getAIStatus();
@@ -906,6 +1020,18 @@ function toggleFullscreen() {
         const fullscreenBtn = document.querySelector('.title-bar-control:nth-child(2)');
         fullscreenBtn.textContent = '❐';
     }
+
+    // Trigger canvas resize after window size change
+    setTimeout(() => {
+        if (window.game) {
+            // Force canvas to update its size
+            if (window.game.updateCanvasSize) {
+                window.game.updateCanvasSize();
+            }
+            // Redraw the game
+            window.game.draw();
+        }
+    }, 350); // Wait for CSS transition to complete
 }
 
 function closeGame() {
@@ -1086,12 +1212,30 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(updateTime, 1000);
     }
 
+    // Handle window resize to detect mode changes (desktop <-> mobile)
+    let lastMobileState = isMobile();
+    window.addEventListener('resize', () => {
+        const currentMobileState = isMobile();
+
+        // If mode changed, force canvas update
+        if (currentMobileState !== lastMobileState) {
+            lastMobileState = currentMobileState;
+
+            if (window.game && window.game.updateCanvasSize) {
+                window.game.updateCanvasSize();
+            }
+        }
+    });
+
     // Handle orientation changes on mobile
     window.addEventListener('orientationchange', () => {
         setTimeout(() => {
             if (window.game) {
+                if (window.game.updateCanvasSize) {
+                    window.game.updateCanvasSize();
+                }
                 window.game.draw();
             }
-        }, 100);
+        }, 200);
     });
 });
